@@ -19,19 +19,21 @@ function Invoke-DownloadFile {
 
         if ($UseBits) {
             Start-BitsTransfer -Source $Uri -Destination $Path
-        } else {
+        }
+        else {
             $WebClient = [System.Net.WebClient]::new()
             $WebClient.DownloadFile($Uri, $Path)
             $WebClient.Dispose()
         }
 
         $Hash = Get-FileHash -Path $Path -Algorithm SHA1
-        if ($Path -notmatch "$($Hash.Hash)\.msu$") {
+        if ($Path -notmatch "$($Hash.Hash)\.msu|.exe$") {
             throw "The hash of the downloaded file does not match the expected value."
         }
 
         Set-TempSecurityProtocol -ResetToDefault
-    } catch {
+    }
+    catch {
         $Err = $_
         if ($WebClient) {
             $WebClient.Dispose()
